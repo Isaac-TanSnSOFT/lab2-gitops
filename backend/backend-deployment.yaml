@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: lab1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: 827812789584.dkr.ecr.ap-southeast-1.amazonaws.com/backend:v4
+          ports:
+            - containerPort: 3002
+          env:
+            - name: PORT
+              value: "3002"
+            - name: SECRET_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: password
+          volumeMounts:
+            - name: volume-file
+              mountPath: /app/volume
+              readOnly: true
+            - name: pvc-volume
+              mountPath: /app/pvc
+      volumes:
+        - name: volume-file
+          configMap:
+            name: backend-volume
+        - name: pvc-volume
+          persistentVolumeClaim:
+            claimName: backend-pvc
+
