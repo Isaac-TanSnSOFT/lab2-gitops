@@ -4,5 +4,5 @@ metadata:
   name: frontend-config
   namespace: lab1
 data:
-  greeting: Hi I am Isaac
+  greeting: Hi, I am Isaac and this is a new greeting
 
