@@ -16,7 +16,10 @@ pipeline {
 
     stage('Login to ECR') {
       steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-ecr-creds']]) {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'cpms-qat-master'
+        ]]) {
           sh '''
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $IMAGE_REPO
           '''
@@ -30,6 +33,7 @@ pipeline {
           def imageTag = sh(script: "date +%Y%m%d%H%M%S", returnStdout: true).trim()
           env.IMAGE_TAG = imageTag
         }
+        echo "🚀 Image tag: $IMAGE_TAG"
         sh 'docker build -t $IMAGE_REPO:$IMAGE_TAG ./frontend'
       }
     }
@@ -43,8 +47,9 @@ pipeline {
     stage('Update Deployment YAML') {
       steps {
         sh '''
-          sed -i "s|image: .*|image: $IMAGE_REPO:$IMAGE_TAG|" ./frontend/frontend-deployment.yaml
+          sed -i "s|image: .*/frontend:.*|image: $IMAGE_REPO:$IMAGE_TAG|" ./frontend/frontend-deployment.yaml
         '''
+        echo "✅ Updated image reference in frontend-deployment.yaml"
       }
     }
 
@@ -63,4 +68,3 @@ pipeline {
     }
   }
 }
-
