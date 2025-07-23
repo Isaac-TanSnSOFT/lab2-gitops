@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         app: frontend
+      annotations:
+        configmap-checksum: "v2"
     spec:
       containers:
         - name: frontend
