@@ -4,5 +4,4 @@ metadata:
   name: frontend-config
   namespace: lab1
 data:
-  greeting: Hi, I am Isaac and this is a new greeting
-
+  greeting: Hi, I am Isaac and this is from ArgoCD AutoSync!
