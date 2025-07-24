@@ -6,6 +6,7 @@ env:
     IMAGE_REPO: 827812789584.dkr.ecr.ap-southeast-1.amazonaws.com/frontend
     SERVICE_DIR: frontend
     GITHUB_USERNAME: Isaac-TanSnSOFT
+    # GITHUB_TOKEN 建议在 CodeBuild 环境变量中设置为 Secret，这里不要直接写
 
 phases:
   pre_build:
@@ -26,7 +27,7 @@ phases:
       - docker push $IMAGE_REPO:$IMAGE_TAG
 
       - echo Updating image tag in $SERVICE_DIR-deployment.yaml...
-      - sed -i "s|image: .*|image: $IMAGE_REPO:$IMAGE_TAG|" $SERVICE_DIR/${SERVICE_DIR}-deployment.yaml
+      - "sed -i 's|image: .*|image: $IMAGE_REPO:$IMAGE_TAG|' $SERVICE_DIR/${SERVICE_DIR}-deployment.yaml"
 
       - echo Setting up Git and pushing changes...
       - git config --global user.email "codebuild@example.com"
@@ -34,7 +35,7 @@ phases:
       - git remote set-url origin https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/$GITHUB_USERNAME/lab2-gitops.git
       - git add $SERVICE_DIR/${SERVICE_DIR}-deployment.yaml
       - git commit -m "Update $SERVICE_DIR image to $IMAGE_TAG" || echo "Nothing to commit"
-      - git push origin HEAD || echo "Git push failed (if nothing to push, ignore this)"
+      - git push origin HEAD || echo "Git push failed (possibly no changes)"
   
 artifacts:
   files:
