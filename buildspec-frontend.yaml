@@ -1,0 +1,40 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: ap-southeast-1
+    IMAGE_REPO: 827812789584.dkr.ecr.ap-southeast-1.amazonaws.com/frontend
+    SERVICE_DIR: frontend
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $IMAGE_REPO
+      - IMAGE_TAG=$(date +%Y%m%d%H%M%S)
+      - echo "IMAGE_TAG=$IMAGE_TAG" >> build.env
+
+  build:
+    commands:
+      - echo Building Docker image...
+      - docker build -t $IMAGE_REPO:$IMAGE_TAG ./$SERVICE_DIR
+
+  post_build:
+    commands:
+      - echo Pushing Docker image...
+      - docker push $IMAGE_REPO:$IMAGE_TAG
+
+      - echo Updating image tag in $SERVICE_DIR-deployment.yaml...
+      - sed -i "s|image: .*|image: $IMAGE_REPO:$IMAGE_TAG|" $SERVICE_DIR/${SERVICE_DIR}-deployment.yaml
+
+      - echo Setting up Git and pushing changes...
+      - git config --global user.email "codebuild@example.com"
+      - git config --global user.name "codebuild"
+      - git add $SERVICE_DIR/${SERVICE_DIR}-deployment.yaml
+      - git commit -m "Update $SERVICE_DIR image to $IMAGE_TAG"
+      - git push
+
+artifacts:
+  files:
+    - build.env
+
