@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 827812789584.dkr.ecr.ap-southeast-1.amazonaws.com/frontend:v3
+          image: $IMAGE_REPO:$IMAGE_TAG
           ports:
             - containerPort: 3001
           env:
